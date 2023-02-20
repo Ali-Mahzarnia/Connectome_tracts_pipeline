@@ -21,7 +21,7 @@ import sys
 subj = sys.argv[1] #reads subj number with s... from input of python file 
 
 
-root= '/mnt/munin6/Badea/Lab/mouse/mrtrix_pipeline/'
+root= 'mrtrix_pipeline/'
 orig_subj_path = root + 'DWI_allsubj_RAS/'
 
 bvec_path_orig = orig_subj_path+subj+'_bvecs.txt' 
@@ -42,7 +42,7 @@ new_bval = np.round(old_bval)
 #new_bval.shape
 np.savetxt(bval_path, new_bval, newline=" ", fmt='%f') # saving the RAS bvec
 
-#bval_path = '/Users/ali/Downloads/N59066_bval.txt'
+#bval_path = 'N59066_bval.txt'
 
 
 
@@ -87,7 +87,7 @@ os.system('mrconvert ' +T1+ ' '+T1_mif + ' -force' )
 out_mif = subj_path + subj+'_subjspace_dwi.mif'
 os.system('mrconvert '+nii_gz_path+ ' ' +out_mif+' -fslgrad '+bvec_path+ ' '+ bval_path+' -bvalue_scaling 0 -force') #turn off the scaling otherwise bvals becomes 0 4000 1000 instead of 2000 
     
-#os.system('mrinfo '+out_mif+ ' -export_grad_fsl ' + '/Users/ali/Desktop/Feb23/mrtrix_pipeline/temp/N59141/test.bvecs /Users/ali/Desktop/Feb23/mrtrix_pipeline/temp/N59141/test.bvals -force'  ) #print the 4th dimension
+#os.system('mrinfo '+out_mif+ ' -export_grad_fsl ' + 'temp/N59141/test.bvecs temp/N59141/test.bvals -force'  ) #print the 4th dimension
 
 
 
