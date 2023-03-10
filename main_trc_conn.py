@@ -17,18 +17,21 @@ import sys
 
 #n_threds = str(multiprocessing.cpu_count())
 
-#subj = "N59141"
 subj = sys.argv[1] #reads subj number with s... from input of python file 
+subj_ref = subj
+#subj_ref = "N59141"
 
 
-root= 'mrtrix_pipeline/'
-orig_subj_path = root + 'DWI_allsubj_RAS/'
+index_gz = ".gz"
 
-bvec_path_orig = orig_subj_path+subj+'_bvecs.txt' 
+root= '/mnt/munin6/Badea/Lab/mouse/mrtrix_pipeline/'
+orig_subj_path = '/mnt/munin6/Badea/Lab/APOE/DWI_allsubj_RAS/'
+
+bvec_path_orig = orig_subj_path+subj_ref+'_bvecs.txt' 
 if not os.path.isfile(bvec_path_orig) : print('where is original bvec?')
 nii_gz_path_orig =  orig_subj_path  + subj +'_coreg_RAS.nii.gz'
 if not os.path.isfile(nii_gz_path_orig) : print('where is original 4d?')
-bval_path_orig = orig_subj_path + subj +'_bvals.txt'
+bval_path_orig = orig_subj_path + subj_ref +'_bvals.txt'
 if not os.path.isfile(bval_path_orig) : print('where is original bval?')
 T1_orig =  orig_subj_path+subj+'_dwi_RAS.nii.gz'
 if not os.path.isfile(T1_orig) : print('where is original DWI?')
@@ -42,7 +45,7 @@ new_bval = np.round(old_bval)
 #new_bval.shape
 np.savetxt(bval_path, new_bval, newline=" ", fmt='%f') # saving the RAS bvec
 
-#bval_path = 'N59066_bval.txt'
+#bval_path = '/Users/ali/Downloads/N59066_bval.txt'
 
 
 
@@ -81,13 +84,13 @@ np.savetxt(bvec_path, new_bvec, fmt='%f') # saving the RAS bvec
 #bvec_path  = '/Users/ali/Downloads/N59066_bvecs.txt'
 
 #changng to mif format
-T1_mif = subj_path+subj+'_T1.mif'
+T1_mif = subj_path+subj+'_T1.mif'+index_gz
 os.system('mrconvert ' +T1+ ' '+T1_mif + ' -force' )
 
-out_mif = subj_path + subj+'_subjspace_dwi.mif'
+out_mif = subj_path + subj+'_subjspace_dwi.mif'+index_gz
 os.system('mrconvert '+nii_gz_path+ ' ' +out_mif+' -fslgrad '+bvec_path+ ' '+ bval_path+' -bvalue_scaling 0 -force') #turn off the scaling otherwise bvals becomes 0 4000 1000 instead of 2000 
     
-#os.system('mrinfo '+out_mif+ ' -export_grad_fsl ' + 'temp/N59141/test.bvecs temp/N59141/test.bvals -force'  ) #print the 4th dimension
+#os.system('mrinfo '+out_mif+ ' -export_grad_fsl ' + '/Users/ali/Desktop/Feb23/mrtrix_pipeline/temp/N59141/test.bvecs /Users/ali/Desktop/Feb23/mrtrix_pipeline/temp/N59141/test.bvals -force'  ) #print the 4th dimension
 
 
 
@@ -112,15 +115,16 @@ os.system('mrconvert '+nii_gz_path+ ' ' +out_mif+' -fslgrad '+bvec_path+ ' '+ bv
 output_denoise = out_mif #####skip denoise
 
 #making fa and Kurt:
-dt_mif = path_perm+subj+'_dt.mif'
-fa_mif = path_perm+subj+'_fa.mif'
-dk_mif = path_perm+subj+'_dk.mif'
-mk_mif = path_perm+subj+'_mk.mif'
-md_mif = path_perm+subj+'_md.mif'
-ad_mif = path_perm+subj+'_ad.mif'
-rd_mif = path_perm+subj+'_rd.mif'
+    
+dt_mif = path_perm+subj+'_dt.mif'+index_gz
+fa_mif = path_perm+subj+'_fa.mif'+index_gz
+dk_mif = path_perm+subj+'_dk.mif'+index_gz
+mk_mif = path_perm+subj+'_mk.mif'+index_gz
+md_mif = path_perm+subj+'_md.mif'+index_gz
+ad_mif = path_perm+subj+'_ad.mif'+index_gz
+rd_mif = path_perm+subj+'_rd.mif'+index_gz
 
-
+#output_denoise = '/Users/ali/Desktop/Feb23/mrtrix_pipeline/temp/N59141/N59141_subjspace_dwi_copy.mif.gz'#
 
 if np.unique(new_bval).shape[0] > 2 :
     os.system('dwi2tensor ' + output_denoise + ' ' + dt_mif + ' -dkt ' +  dk_mif +' -fslgrad ' +  bvec_path + ' ' + bval_path + ' -force'  )
@@ -130,7 +134,10 @@ if np.unique(new_bval).shape[0] > 2 :
 else: 
     os.system('dwi2tensor ' + output_denoise + ' ' + dt_mif  +' -fslgrad ' +  bvec_path + ' ' + bval_path + ' -force'  )
     os.system('tensor2metric  -fa ' + fa_mif  + ' '+ dt_mif + ' -force' ) 
-    
+    os.system('tensor2metric  -rd ' + rd_mif  + ' '+ dt_mif + ' -force' ) # if doesn't work take this out :(
+    os.system('tensor2metric  -ad ' + ad_mif  + ' '+ dt_mif + ' -force' ) # if doesn't work take this out :(
+    os.system('tensor2metric  -adc ' + md_mif  + ' '+ dt_mif + ' -force' ) # if doesn't work take this out :(
+
     #os.system('mrview '+ fa_mif) #inspect residual
 
 den_preproc_mif = output_denoise # already skipping preprocessing (always)
@@ -181,7 +188,7 @@ mask_of_label= mask_of_label.astype(int)
 
 file_result= nib.Nifti1Image(mask_of_label, label_nii.affine, label_nii.header)
 nib.save(file_result,mask_output  )  
-mask_mif   = subj_path +subj+'mask_of_label.mif'
+mask_mif   = subj_path +subj+'mask_of_label.mif'+index_gz
 os.system('mrconvert '+mask_output+ ' ' +mask_mif+ ' -datatype uint16 -force')
 #os.system('mrview '+fa_mif + ' -overlay.load '+ mask_mif ) 
 
@@ -196,7 +203,7 @@ os.system('mrconvert '+mask_output+ ' ' +mask_mif+ ' -datatype uint16 -force')
 wm_txt =   subj_path+subj+'_wm.txt' 
 gm_txt =  subj_path+subj+'_gm.txt' 
 csf_txt = subj_path+subj+'_csf.txt'
-voxels_mif =  subj_path+subj+'_voxels.mif'
+voxels_mif =  subj_path+subj+'_voxels.mif'+index_gz
 os.system('dwi2response dhollander '+den_unbiased_mif+ ' ' +wm_txt+ ' ' + gm_txt + ' ' + csf_txt + ' -voxels ' + voxels_mif+' -mask '+ mask_mif + ' -scratch ' +subj_path + ' -fslgrad ' +bvec_path + ' '+ bval_path   +'  -force' )
 
 #Viewing the Basis Functions:
@@ -206,9 +213,9 @@ os.system('dwi2response dhollander '+den_unbiased_mif+ ' ' +wm_txt+ ' ' + gm_txt
 #os.system('shview '+csf_txt)
 
 #Applying the basis functions to the diffusion data:
-wmfod_mif =  subj_path+subj+'_wmfod.mif'
-gmfod_mif = subj_path+subj+'_gmfod.mif'
-csffod_mif = subj_path+subj+'_csffod.mif'
+wmfod_mif =  subj_path+subj+'_wmfod.mif'+index_gz
+gmfod_mif = subj_path+subj+'_gmfod.mif'+index_gz
+csffod_mif = subj_path+subj+'_csffod.mif'+index_gz
 
 #os.system('dwi2fod msmt_csd ' +den_unbiased_mif+ ' -mask '+mask_mif+ ' ' +wm_txt+ ' ' + wmfod_mif+ ' ' +gm_txt+ ' ' + gmfod_mif+ ' ' +csf_txt+ ' ' + csffod_mif + ' -force' )
 os.system('dwi2fod msmt_csd ' +den_unbiased_mif+ ' -mask '+mask_mif+ ' ' +wm_txt+ ' ' + wmfod_mif+ ' -force' )
@@ -223,7 +230,7 @@ os.system('dwi2fod msmt_csd ' +den_unbiased_mif+ ' -mask '+mask_mif+ ' ' +wm_txt
 #os.system('mrview ' +fa_mif+ ' -odf.load_sh '+wmfod_mif )
 
 #Normalizing the FODs:
-wmfod_norm_mif =  subj_path+subj+'_wmfod_norm.mif'
+wmfod_norm_mif =  subj_path+subj+'_wmfod_norm.mif'+index_gz
 #gmfod_norm_mif = subj_path+subj+'_gmfod_norm.mif'
 #csffod_norm_mif = subj_path+subj+'_csffod_norm.mif'  
 os.system('mtnormalise ' +wmfod_mif+ ' '+wmfod_norm_mif+' -mask ' + mask_mif + '  -force')
@@ -241,7 +248,10 @@ gmwmSeed_coreg_mif  = mask_mif
 tracks_10M_tck  = subj_path +subj+'_tracks_10M.tck' 
 #os.system('tckgen -act ' + fivett_coreg_mif + '  -backtrack -seed_gmwmi '+ gmwmSeed_coreg_mif + ' -maxlength 250 -cutoff 0.06 -select 10000000 ' + wmfod_norm_mif + ' ' + tracks_10M_tck + ' -force')
 #seconds1 = time.time()
-os.system('tckgen -backtrack -seed_image '+ gmwmSeed_coreg_mif + ' -maxlength 1000 -cutoff 0.3 -select 50k ' + wmfod_norm_mif + ' ' + tracks_10M_tck + ' -force')
+os.system('echo tckgen -backtrack -seed_image '+ gmwmSeed_coreg_mif + ' -maxlength 1000 -cutoff 0.1 -select 10000000 ' + wmfod_norm_mif + ' ' + tracks_10M_tck + ' -force')
+
+os.system('tckgen -backtrack -seed_image '+ gmwmSeed_coreg_mif + ' -maxlength 1000 -cutoff 0.1 -select 10000000 ' + wmfod_norm_mif + ' ' + tracks_10M_tck + ' -force')
+
 #os.system('tckgen -backtrack -seed_image '+ gmwmSeed_coreg_mif + ' -maxlength 1000 -cutoff 0.3 -select 50k ' + wmfod_norm_mif + ' ' + tracks_10M_tck + ' -force')
 #seconds2 = time.time()
 #(seconds2 - seconds1)/360 # a million track in hippo takes 12.6 mins
@@ -249,6 +259,7 @@ os.system('tckgen -backtrack -seed_image '+ gmwmSeed_coreg_mif + ' -maxlength 10
 
 #Extracting a subset of tracks:
 smallerTracks = path_perm+subj+'_smallerTracks2mill.tck'
+os.system('echo tckedit '+ tracks_10M_tck + ' -number 2000000 -minlength 0.1 ' + smallerTracks + ' -force')
 os.system('tckedit '+ tracks_10M_tck + ' -number 2000000 -minlength 0.1 ' + smallerTracks + ' -force')
 #os.system('mrview ' + den_unbiased_mif + ' -tractography.load '+ smallerTracks)
 
@@ -259,6 +270,8 @@ os.system('tckedit '+ tracks_10M_tck + ' -number 2000000 -minlength 0.1 ' + smal
 sift_mu_txt = subj_path+subj+'_sift_mu.txt'
 sift_coeffs_txt = subj_path+subj+'_sift_coeffs.txt'
 sift_1M_txt = subj_path+subj+'_sift_1M.txt'
+
+os.system('echo tcksift2  -out_mu '+ sift_mu_txt + ' -out_coeffs ' + sift_coeffs_txt + ' ' + smallerTracks + ' ' + wmfod_norm_mif+ ' ' + sift_1M_txt  + ' -force')
 os.system('tcksift2  -out_mu '+ sift_mu_txt + ' -out_coeffs ' + sift_coeffs_txt + ' ' + smallerTracks + ' ' + wmfod_norm_mif+ ' ' + sift_1M_txt  + ' -force')
 
 #####connectome
@@ -293,7 +306,7 @@ for i in labels:
 file_result= nib.Nifti1Image(labels_data, label_nii.affine, label_nii.header)
 new_label  = subj_path +subj+'_new_label.nii.gz'
 nib.save(file_result, new_label ) 
-parcels_mif = subj_path+subj+'_parcels.mif'
+parcels_mif = subj_path+subj+'_parcels.mif'+index_gz
 os.system('mrconvert '+new_label+ ' ' +parcels_mif + ' -force' )
 
 #os.system('mrview '+ fa_mif + ' -tractography.load '+ smallerTracks) 
