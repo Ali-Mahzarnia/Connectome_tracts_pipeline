@@ -15,8 +15,8 @@ try :
 #os.environ['GIT_PAGER']
 except KeyError:  
     print('BD not found locally')
-    BD = '/mnt/munin6/Badea/Lab/mouse'    
-    #BD ='/Users/ali/Desktop/biac/example'
+    BD = '***/mouse'    
+    #BD ='***/example'
 else:
     print("BD is found locally.")
 #create sbatch folder
@@ -26,19 +26,19 @@ sbatch_folder_path = BD+"/mrtrix_pipeline/"+job_descrp + '_sbatch/'
 if not os.path.exists(sbatch_folder_path):
     os.system(f"mkdir -p {sbatch_folder_path}" )
     #os.makedirs(sbatch_folder_path)
-GD = '/mnt/clustertmp/common/rja20_dev/gunnies/'
-#GD = '/mnt/munin6/Badea/Lab/mouse/mrtrix_pipeline/'
+GD = '***/gunnies/'
+#GD = '***/mrtrix_pipeline/'
 
 
-list_folders_path ='/mnt/munin6/Badea/Lab/APOE/DWI_allsubj_RAS/'
-#list_folders_path = '/Volumes/Data/Badea/Lab/APOE/DWI_allsubj_RAS/'
+list_folders_path ='***/DWI_allsubj_RAS/'
+#list_folders_path = '***/DWI_allsubj_RAS/'
 list_folders_path = os.listdir(list_folders_path)
 list_of_subjs_long = [i for i in list_folders_path if 'dwi' in i]
 
 list_of_subjs = [i.partition('_dwi_RAS.nii.gz')[0] for i in list_of_subjs_long]
 
-conn_path = '/mnt/munin6/Badea/Lab/mouse/mrtrix_pipeline/connectome/'
-#conn_path = '/Volumes/Data/Badea/Lab/mouse/mrtrix_pipeline/connectome/'
+conn_path = '***/mrtrix_pipeline/connectome/'
+#conn_path = '***/mrtrix_pipeline/connectome/'
 if os.path.isdir(conn_path):
     done_subj = os.listdir(conn_path)
     done_subj = [i for i in done_subj if 'conn_plain' in i]
@@ -51,8 +51,8 @@ for subj in list_of_subjs:
     #print(subj)
     #fmri_file = list_fmir_folders_path +subj + "/ses-1/func/" + subj +"_ses-1_bold.nii.gz" 
     #nib.load(fmri_file)
-    python_command = "python /mnt/munin6/Badea/Lab/mouse/mrtrix_pipeline/main_trc_conn.py "+subj
-    #python_command = "python /mnt/munin6/Badea/Lab/mouse/mrtrix_pipeline/main_trc_conn.py "+subj
+    python_command = "python ***/mrtrix_pipeline/main_trc_conn.py "+subj
+    #python_command = "python ***/mrtrix_pipeline/main_trc_conn.py "+subj
     job_name = job_descrp + "_"+ subj
     command = GD + "submit_sge_cluster_job.bash " + sbatch_folder_path + " "+ job_name + " 0 0 '"+ python_command+"'"   
     os.system(command)
