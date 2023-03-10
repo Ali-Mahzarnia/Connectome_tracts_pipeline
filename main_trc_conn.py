@@ -24,8 +24,8 @@ subj_ref = subj
 
 index_gz = ".gz"
 
-root= '/mnt/munin6/Badea/Lab/mouse/mrtrix_pipeline/'
-orig_subj_path = '/mnt/munin6/Badea/Lab/APOE/DWI_allsubj_RAS/'
+root= '***/mrtrix_pipeline/'
+orig_subj_path = '***/DWI_allsubj_RAS/'
 
 bvec_path_orig = orig_subj_path+subj_ref+'_bvecs.txt' 
 if not os.path.isfile(bvec_path_orig) : print('where is original bvec?')
@@ -69,7 +69,7 @@ if not os.path.isdir(subj_path) : os.mkdir(subj_path)
 
 #volS_RAS_path = subj_path + subj + '_' 
 #nii_gz_path =  path_perm  + subj +'_RAS_coreg.nii.gz'
-#os.system(f'/Users/ali/Downloads/ANTsR/install/bin/ImageMath 4 {nii_gz_path} TimeSeriesAssemble 1 0 {volS_RAS_path}*RAS.nii.gz') # concatenate volumes of fmri
+#os.system(f'***/ANTsR/install/bin/ImageMath 4 {nii_gz_path} TimeSeriesAssemble 1 0 {volS_RAS_path}*RAS.nii.gz') # concatenate volumes of fmri
 nii_gz_path = nii_gz_path_orig
 
 bvec_path = path_perm+subj+'_bvecs_RAS.txt' 
@@ -81,7 +81,7 @@ new_bvec[1:,2] = -new_bvec[1:,2] # flip z sign
 new_bvec=new_bvec.transpose()
 np.savetxt(bvec_path, new_bvec, fmt='%f') # saving the RAS bvec
 #bvec_path = bvec_path_orig
-#bvec_path  = '/Users/ali/Downloads/N59066_bvecs.txt'
+#bvec_path  = '***/Downloads/N59066_bvecs.txt'
 
 #changng to mif format
 T1_mif = subj_path+subj+'_T1.mif'+index_gz
@@ -90,7 +90,7 @@ os.system('mrconvert ' +T1+ ' '+T1_mif + ' -force' )
 out_mif = subj_path + subj+'_subjspace_dwi.mif'+index_gz
 os.system('mrconvert '+nii_gz_path+ ' ' +out_mif+' -fslgrad '+bvec_path+ ' '+ bval_path+' -bvalue_scaling 0 -force') #turn off the scaling otherwise bvals becomes 0 4000 1000 instead of 2000 
     
-#os.system('mrinfo '+out_mif+ ' -export_grad_fsl ' + '/Users/ali/Desktop/Feb23/mrtrix_pipeline/temp/N59141/test.bvecs /Users/ali/Desktop/Feb23/mrtrix_pipeline/temp/N59141/test.bvals -force'  ) #print the 4th dimension
+#os.system('mrinfo '+out_mif+ ' -export_grad_fsl ' + '***/mrtrix_pipeline/temp/N59141/test.bvecs /Users/ali/Desktop/Feb23/mrtrix_pipeline/temp/N59141/test.bvals -force'  ) #print the 4th dimension
 
 
 
@@ -124,7 +124,7 @@ md_mif = path_perm+subj+'_md.mif'+index_gz
 ad_mif = path_perm+subj+'_ad.mif'+index_gz
 rd_mif = path_perm+subj+'_rd.mif'+index_gz
 
-#output_denoise = '/Users/ali/Desktop/Feb23/mrtrix_pipeline/temp/N59141/N59141_subjspace_dwi_copy.mif.gz'#
+#output_denoise = '***/mrtrix_pipeline/temp/N59141/N59141_subjspace_dwi_copy.mif.gz'#
 
 if np.unique(new_bval).shape[0] > 2 :
     os.system('dwi2tensor ' + output_denoise + ' ' + dt_mif + ' -dkt ' +  dk_mif +' -fslgrad ' +  bvec_path + ' ' + bval_path + ' -force'  )
